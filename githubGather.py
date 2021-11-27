@@ -13,15 +13,13 @@ def getTokenFromFile():
     return token
 
 class CommitData:
-    def __init__(self, userName, linesAdded, linesDeleted, date):
-        self.userName = userName
+    def __init__(self, linesAdded, linesDeleted, date):
         self.linesAdded = linesAdded
         self.linesDeleted = linesDeleted
         self.date = date
         self.sum = linesDeleted + linesAdded
         self.difference = linesAdded - linesDeleted
         self.daysSinceLastCommit = 0
-
 
 def getCommitsByRepo(repoLink):
     g = Github(getTokenFromFile())
@@ -38,9 +36,9 @@ def getCommitsByRepo(repoLink):
             print(f"analysing commits {count}/{commitsLength} in repo {repoName}")
             login = commit.author.login
             if login in contributorsCommitsDict:
-                contributorsCommitsDict[login].append(CommitData(login, commit.stats.additions, commit.stats.deletions, commit.commit.committer.date))
+                contributorsCommitsDict[login].append(CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date))
             else:
-                contributorsCommitsDict[login] = [CommitData(login, commit.stats.additions, commit.stats.deletions, commit.commit.committer.date)]
+                contributorsCommitsDict[login] = [CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date)]
             count+=1
         except:
             pass
@@ -71,39 +69,12 @@ def getCommitsTime(commits):
         oldCommit = commit
     return newCommits
 
-def getFilteredCommits(commits, percent, attribute):
-    commits.sort(key=lambda x: x.daysSinceLastCommit, reverse=False)
-    filteredDateCommits = commits[int(percent*len(commits) / 100):int((100-percent) * len(commits) / 100)]
+def getCsvFromCommits(commits):
+    data = []
+    data.append(["days", "linesAdded", "linesDeleted"])
+    for commit in commits:
+        data.append([commit.daysSinceLastCommit, commit.linesAdded, commit.linesDeleted])
 
-    xs = []
-    ys = []
+    return data
 
-    if attribute == "linesAdded":
-        commits.sort(key=lambda x: x.linesAdded, reverse=False)
-        filteredSizeCommits = commits[int(percent*len(commits) / 100):int((100-percent) * len(commits) / 100)]
-    elif attribute == "linesDeleted":
-        commits.sort(key=lambda x: x.linesDeleted, reverse=False)
-        filteredSizeCommits = commits[int(percent * len(commits) / 100):int((100 - percent) * len(commits) / 100)]
-    elif attribute == "sum":
-        commits.sort(key=lambda x: x.sum, reverse=False)
-        filteredSizeCommits = commits[int(percent * len(commits) / 100):int((100 - percent) * len(commits) / 100)]
-    elif attribute == "difference":
-        commits.sort(key=lambda x: x.difference, reverse=False)
-        filteredSizeCommits = commits[int(percent * len(commits) / 100):int((100 - percent) * len(commits) / 100)]
-    else:
-        print(f"Invalid attribute {attribute}, should be linesAdded, linesDeleted, sum or difference")
-        return xs, ys
 
-    filteredCommitsData = list(set(filteredDateCommits).intersection(set(filteredSizeCommits)))
-
-    for commit in filteredCommitsData:
-        xs.append(commit.daysSinceLastCommit)
-        if attribute == "linesAdded":
-            ys.append(commit.linesAdded)
-        elif attribute == "linesDeleted":
-            ys.append(commit.linesDeleted)
-        elif attribute == "sum":
-            ys.append(commit.sum)
-        elif attribute == "difference":
-            ys.append(commit.difference)
-    return xs, ys
