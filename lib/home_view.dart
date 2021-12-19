@@ -28,10 +28,10 @@ Future<List<String>> fetchData(String repoLink) async {
 
 
 class _HomeViewState extends State<HomeView> {
-  @override
   bool invalid = false;
   String repoLink = "";
   List<String> commits = [];
+  @override
   Widget build(BuildContext context) {
     final viewport = MediaQuery.of(context).size;
     final width = viewport.width;
@@ -51,7 +51,7 @@ class _HomeViewState extends State<HomeView> {
           children: [
             Text(
               invalid? "Invalid repository link!" : "",
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
             Container(
               width: width/1.618,
@@ -71,15 +71,15 @@ class _HomeViewState extends State<HomeView> {
                     }
                   });
                 },
-                style: TextStyle(
+                style: const TextStyle(
                   color: color3,
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: InputDecoration(
-                  enabledBorder: UnderlineInputBorder(
+                  enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: color3),
                   ),
-                  focusedBorder: UnderlineInputBorder(
+                  focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: color3),
                   ),
                   hintText: "Repository Link",
@@ -113,7 +113,7 @@ class _HomeViewState extends State<HomeView> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(color3),
               ),
-              child:Text(
+              child:const Text(
                 "Visualise",
                 style: TextStyle(
                   fontSize:20,

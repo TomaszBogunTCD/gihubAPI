@@ -34,8 +34,7 @@ class _VisualisationState extends State<Visualisation> {
   late double graphYRangeEnd;
 
   Map data = {};
-  bool slidersJustChanged = false;
-  bool slidersFinishedChanging = false;
+  bool sliderChanged = false;
   bool viewingLinesAdded = true;
   bool viewingLinesDeleted = false;
   bool viewingSum = false;
@@ -44,39 +43,33 @@ class _VisualisationState extends State<Visualisation> {
   String labelText = "Lines Added";
   @override
   Widget build(BuildContext context) {
-    if(!slidersJustChanged) {
       data = ModalRoute.of(context)!.settings.arguments as Map;
       List<String> commits = data["commits"];
-      if(firstRun || !slidersFinishedChanging){
-        print("///////////////////////");
+      if(firstRun){
         commitObjects = getCommitObjectsFromStringList(commits, double.negativeInfinity, double.infinity, double.negativeInfinity, double.infinity, viewingLinesAdded, viewingLinesDeleted, viewingSum);
         points = getLineOfBestFitPoints(commitObjects, viewingLinesAdded, viewingLinesDeleted, viewingSum);
         maxX = points[2].x;
         maxY = points[2].y;
         firstRun = false;
       }else{
-        print("========================");
         commitObjects = getCommitObjectsFromStringList(commits, xRangeStart, xRangeEnd, yRangeStart, yRangeEnd, viewingLinesAdded, viewingLinesDeleted, viewingSum);
         points = getLineOfBestFitPoints(commitObjects, viewingLinesAdded, viewingLinesDeleted, viewingSum);
       }
       lineOfBestFitPoints = points.sublist(0, 2);
       m = points.last.x;
       c = points.last.y;
-      if(!slidersFinishedChanging){
+      if(!sliderChanged){
         xRangeStart = 0;
         xRangeEnd = maxX;
         yRangeStart = 0;
         yRangeEnd = maxY;
       }else{
-        slidersFinishedChanging = false;
+        sliderChanged = false;
       }
       graphXRangeStart = xRangeStart;
       graphXRangeEnd = xRangeEnd;
       graphYRangeStart = yRangeStart;
       graphYRangeEnd = yRangeEnd;
-    }else{
-      slidersJustChanged = false;
-    }
 
     List<charts.Series<Commit, double>> pointSeries = [
       charts.Series(
@@ -146,14 +139,14 @@ class _VisualisationState extends State<Visualisation> {
           Text("For every extra day spent between commits, the ${viewingLinesAdded? " amount of lines added " : (viewingLinesDeleted ? " amount of lines deleted" : (viewingSum ? "sum of lines added and lines deleted" : "difference between lines added and lines deleted"))} ${m > 0 ? "increased" : "decreased"} by ${roundDouble(m, 3)} on average"),
           Expanded(
             flex: 1,
-              child:Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Lines Added"),
-                      Checkbox(
+            child:Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Lines Added"),
+                    Checkbox(
                         value: viewingLinesAdded,
                         onChanged: (value){
                           setState(() {
@@ -161,14 +154,14 @@ class _VisualisationState extends State<Visualisation> {
                             labelText = "Lines Added";
                           });
                         }
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Lines Deleted"),
-                      Checkbox(
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Lines Deleted"),
+                    Checkbox(
                         value: viewingLinesDeleted,
                         onChanged: (value){
                           setState(() {
@@ -176,14 +169,14 @@ class _VisualisationState extends State<Visualisation> {
                             viewingLinesAdded = false; viewingLinesDeleted = true; viewingSum = false; viewingDifference = false;
                           });
                         }
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Lines Added + Lines Deleted"),
-                      Checkbox(
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Lines Added + Lines Deleted"),
+                    Checkbox(
                         value: viewingSum,
                         onChanged: (value){
                           setState(() {
@@ -191,14 +184,14 @@ class _VisualisationState extends State<Visualisation> {
                             viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = true; viewingDifference = false;
                           });
                         }
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Lines Added - Lines Deleted"),
-                      Checkbox(
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Lines Added - Lines Deleted"),
+                    Checkbox(
                         value: viewingDifference,
                         onChanged: (value){
                           setState(() {
@@ -206,73 +199,95 @@ class _VisualisationState extends State<Visualisation> {
                             viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = false; viewingDifference = true;
                           });
                         }
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("X-Axis Range: "),
-              SizedBox(
-                  width: 40,
-                  child: Text(roundDouble(xRangeStart, 1).toString())
-              ),
-              RangeSlider(
-                min: 0,
-                max: maxX,
-                values: RangeValues(xRangeStart, xRangeEnd),
-                onChanged: (RangeValues value) {
-                  setState(() {
-                    xRangeStart = value.start;
-                    xRangeEnd = value.end;
-                    slidersJustChanged = true;
-                  });
-                },
-                onChangeEnd: (value){
-                  setState(() {
-                    xRangeStart = value.start;
-                    xRangeEnd = value.end;
-                    //slidersJustChanged = true;
-                    slidersFinishedChanging = true;
-                  });
-                },
-              ),
-              SizedBox(
-                  width: 40,
-                  child: Text(roundDouble(xRangeEnd, 1).toString())
-              ),
-              const Text("Y-Axis Range: "),
-              SizedBox(
-                  width: 40,
-                  child: Text(roundDouble(yRangeStart, 1).toString())
-              ),
-              RangeSlider(
-                max: maxY,
-                values: RangeValues(yRangeStart, yRangeEnd),
-                onChanged: (RangeValues value) {
-                  setState(() {
-                    yRangeStart = value.start;
-                    yRangeEnd = value.end;
-                    slidersJustChanged = true;
-                  });
-                },
-                onChangeEnd: (value){
-                  setState(() {
-                    yRangeStart = value.start;
-                    yRangeEnd = value.end;
-                    //slidersJustChanged = true;
-                    slidersFinishedChanging = true;
-                  });
-                },
-              ),
-              SizedBox(
-                  width: 40,
-                  child: Text(roundDouble(yRangeEnd, 1).toString())
-              ),
-            ],
+          StatefulBuilder(builder: (_context, _setState){
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("X-Axis Range: "),
+                  SizedBox(
+                      width: 40,
+                      child: Text(roundDouble(xRangeStart, 1).toString())
+                  ),
+                  RangeSlider(
+                    min: 0,
+                    max: maxX,
+                    values: RangeValues(xRangeStart, xRangeEnd),
+                    onChanged: (RangeValues value) {
+                      _setState(() {
+                        xRangeStart = value.start;
+                        xRangeEnd = value.end;
+                        sliderChanged = true;
+                      });
+                    },
+                    onChangeEnd: (value){
+                      _setState(() {
+                        xRangeStart = value.start;
+                        xRangeEnd = value.end;
+                        sliderChanged = true;
+                      });
+                    },
+                  ),
+                  SizedBox(
+                      width: 40,
+                      child: Text(roundDouble(xRangeEnd, 1).toString())
+                  ),
+                  const Text("Y-Axis Range: "),
+                  SizedBox(
+                      width: 40,
+                      child: Text(roundDouble(yRangeStart, 1).toString())
+                  ),
+                  RangeSlider(
+                    max: maxY,
+                    values: RangeValues(yRangeStart, yRangeEnd),
+                    onChanged: (RangeValues value) {
+                      _setState(() {
+                        yRangeStart = value.start;
+                        yRangeEnd = value.end;
+                        sliderChanged = true;
+                      });
+                    },
+                    onChangeEnd: (value){
+                      _setState(() {
+                        yRangeStart = value.start;
+                        yRangeEnd = value.end;
+                        sliderChanged = true;
+                      });
+                    },
+                  ),
+                  SizedBox(
+                      width: 40,
+                      child: Text(roundDouble(yRangeEnd, 1).toString())
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: (){
+                      if(sliderChanged){
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: color4,
+                    ),
+                    label: Text(
+                      "Refresh",
+                      style: TextStyle(
+                        color: (sliderChanged ? Colors.white : Colors.black),
+                      ),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(sliderChanged? color3 : color5),
+                      foregroundColor: MaterialStateProperty.all<Color>(sliderChanged? color3 : color5),
+                    ),
+                  )
+                ],
+              );
+            }
           )
         ],
       ),
