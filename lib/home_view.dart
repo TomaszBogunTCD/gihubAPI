@@ -4,6 +4,7 @@ import 'globals.dart' as globals;
 import 'globals.dart';
 import 'package:http/http.dart';
 import 'main.dart';
+import 'functions.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -20,9 +21,7 @@ Future<List<String>> fetchData(String repoLink) async {
   String data = response.body;
   List<String> lines = data.split("\n");
   lines.removeAt(0);
-  for(int i=0; i<lines.length; i++){
-    print(lines[i]);
-  }
+  lines.removeLast();
   return lines;
 }
 
@@ -122,6 +121,9 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
             ),
+            const Text("This visualisation graphs the link between time between commits by a user and the size of the commits."),
+            const Text("The size of the commit is either: lines added, lines deleted, sum of those two, or the difference of those two"),
+            const Text("Any commits by a user that has contributed only one commit to the repo will not be counted, because the time between their commits cannot be determined from one commit", textAlign: TextAlign.center,)
           ],
         ),
       ),
