@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
 import 'home_view.dart';
+import 'about.dart';
 import 'visualisationView.dart';
 
 void main() => runApp(MaterialApp(
@@ -9,5 +10,6 @@ void main() => runApp(MaterialApp(
     '/': (context) => const HomeView(),
     '/home': (context) => const HomeView(),
     '/visualisation': (context) => const Visualisation(),
+    '/about' : (context) => const About(),
   },
 ));

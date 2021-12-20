@@ -78,7 +78,12 @@ List<Point> getLineOfBestFitPoints(List<Commit> commitObjects, bool viewingLines
           (currentCommit.difference - meanY));
     }
   }
-  double m = sumNumerator / sumDenominator;
+  double m;
+  if(sumDenominator == 0){
+    m = 0;
+  }else{
+    m = sumNumerator / sumDenominator;
+  }
   double c = meanY - (m*meanX);
   return [Point(0, c), Point(maxX, (maxX*m)+c), Point(maxX, maxY), Point(m,c)];
 }

@@ -1,9 +1,6 @@
-import 'dart:math';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
 import 'globals.dart';
-import 'package:http/http.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'functions.dart';
 
@@ -56,6 +53,7 @@ class _VisualisationState extends State<Visualisation> {
         points = getLineOfBestFitPoints(commitObjects, viewingLinesAdded, viewingLinesDeleted, viewingSum);
       }
       lineOfBestFitPoints = points.sublist(0, 2);
+
       m = points.last.x;
       c = points.last.y;
       if(!sliderChanged){
@@ -77,6 +75,7 @@ class _VisualisationState extends State<Visualisation> {
         data: commitObjects,
         domainFn: (Commit commit, _) => commit.daysSinceLastCommit,
         measureFn: (Commit commit, _) => viewingLinesAdded? commit.linesAdded : (viewingLinesDeleted ? commit.linesDeleted : (viewingSum ? commit.sum : commit.difference)),
+        colorFn: (Commit commit, _) => charts.Color.fromHex(code: color3.toString().substring(9, 16)),
       )
     ];
     List<charts.Series<Point, double>> lineSeries = [
@@ -85,6 +84,7 @@ class _VisualisationState extends State<Visualisation> {
         data: lineOfBestFitPoints,
         domainFn: (Point point, _) => point.x,
         measureFn: (Point point, _) => point.y,
+        colorFn: (Point point, _) => charts.Color.fromHex(code: color3.toString().substring(9, 16)),
       )
     ];
     return Scaffold(
@@ -136,7 +136,7 @@ class _VisualisationState extends State<Visualisation> {
           const SizedBox(height: 20,),
           Text("y = ${roundDouble(m, 3)}x + ${roundDouble(c, 3)}"),
           const SizedBox(height: 10,),
-          Text("For every extra day spent between commits, the ${viewingLinesAdded? " amount of lines added " : (viewingLinesDeleted ? " amount of lines deleted" : (viewingSum ? "sum of lines added and lines deleted" : "difference between lines added and lines deleted"))} ${m > 0 ? "increased" : "decreased"} by ${roundDouble(m, 3)} on average"),
+          Text("For every extra day spent between commits, the ${viewingLinesAdded? "amount of lines added " : (viewingLinesDeleted ? "amount of lines deleted" : (viewingSum ? "sum of lines added and lines deleted" : "difference between lines added and lines deleted"))} ${m >= 0 ? "increased" : "decreased"} by ${roundDouble(m, 3)} on average"),
           Expanded(
             flex: 1,
             child:Row(
@@ -145,61 +145,69 @@ class _VisualisationState extends State<Visualisation> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Checkbox(
+                      value: viewingLinesAdded,
+                      onChanged: (value){
+                        setState(() {
+                          viewingLinesAdded = true; viewingLinesDeleted = false; viewingSum = false; viewingDifference = false;
+                          labelText = "Lines Added";
+                        });
+                      },
+                      activeColor: color3,
+                      checkColor: color4,
+                    ),
                     const Text("Lines Added"),
-                    Checkbox(
-                        value: viewingLinesAdded,
-                        onChanged: (value){
-                          setState(() {
-                            viewingLinesAdded = true; viewingLinesDeleted = false; viewingSum = false; viewingDifference = false;
-                            labelText = "Lines Added";
-                          });
-                        }
-                    ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Checkbox(
+                      value: viewingLinesDeleted,
+                      onChanged: (value){
+                        setState(() {
+                          labelText = "Lines Deleted";
+                          viewingLinesAdded = false; viewingLinesDeleted = true; viewingSum = false; viewingDifference = false;
+                        });
+                      },
+                      activeColor: color3,
+                      checkColor: color4,
+                    ),
                     const Text("Lines Deleted"),
-                    Checkbox(
-                        value: viewingLinesDeleted,
-                        onChanged: (value){
-                          setState(() {
-                            labelText = "Lines Deleted";
-                            viewingLinesAdded = false; viewingLinesDeleted = true; viewingSum = false; viewingDifference = false;
-                          });
-                        }
-                    ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Checkbox(
+                      value: viewingSum,
+                      onChanged: (value){
+                        setState(() {
+                          labelText = "Lines Added + Lines Deletes";
+                          viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = true; viewingDifference = false;
+                        });
+                      },
+                      activeColor: color3,
+                      checkColor: color4,
+                    ),
                     const Text("Lines Added + Lines Deleted"),
-                    Checkbox(
-                        value: viewingSum,
-                        onChanged: (value){
-                          setState(() {
-                            labelText = "Lines Added + Lines Deletes";
-                            viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = true; viewingDifference = false;
-                          });
-                        }
-                    ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Lines Added - Lines Deleted"),
                     Checkbox(
-                        value: viewingDifference,
-                        onChanged: (value){
-                          setState(() {
-                            labelText = "Lines Added - Lines Deleted";
-                            viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = false; viewingDifference = true;
-                          });
-                        }
+                      value: viewingDifference,
+                      onChanged: (value){
+                        setState(() {
+                          labelText = "Lines Added - Lines Deleted";
+                          viewingLinesAdded = false; viewingLinesDeleted = false; viewingSum = false; viewingDifference = true;
+                        });
+                      },
+                      activeColor: color3,
+                      checkColor: color4,
                     ),
+                    const Text("Lines Added - Lines Deleted"),
                   ],
                 ),
               ],
@@ -232,6 +240,8 @@ class _VisualisationState extends State<Visualisation> {
                         sliderChanged = true;
                       });
                     },
+                    activeColor: color3,
+                    inactiveColor: color5,
                   ),
                   SizedBox(
                       width: 40,
@@ -259,6 +269,8 @@ class _VisualisationState extends State<Visualisation> {
                         sliderChanged = true;
                       });
                     },
+                    activeColor: color3,
+                    inactiveColor: color5,
                   ),
                   SizedBox(
                       width: 40,

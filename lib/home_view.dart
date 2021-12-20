@@ -44,6 +44,21 @@ class _HomeViewState extends State<HomeView> {
         ),
         backgroundColor: globals.color3,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            Navigator.pushNamed(context, "/about");
+          });
+        },
+        child: const Text(
+          "?",
+          style: TextStyle(
+            color: color4,
+            fontSize: 50
+          ),
+        ),
+        backgroundColor: color3,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -53,7 +68,7 @@ class _HomeViewState extends State<HomeView> {
               invalid? "Invalid repository link!" : "",
               style: const TextStyle(color: Colors.red),
             ),
-            Container(
+            SizedBox(
               width: width/1.618,
               child: TextField(
                 onChanged: (value){
@@ -113,17 +128,17 @@ class _HomeViewState extends State<HomeView> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(color3),
               ),
-              child:const Text(
-                "Visualise",
-                style: TextStyle(
-                  fontSize:20,
-                  color: color2,
+              child:const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "Visualise",
+                  style: TextStyle(
+                    fontSize:20,
+                    color: color4,
+                  ),
                 ),
               ),
             ),
-            const Text("This visualisation graphs the link between time between commits by a user and the size of the commits."),
-            const Text("The size of the commit is either: lines added, lines deleted, sum of those two, or the difference of those two"),
-            const Text("Any commits by a user that has contributed only one commit to the repo will not be counted, because the time between their commits cannot be determined from one commit", textAlign: TextAlign.center,)
           ],
         ),
       ),
