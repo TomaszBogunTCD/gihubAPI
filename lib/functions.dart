@@ -21,6 +21,10 @@ class Point{
 
 //calculate the two points for the line of best fit based on the list of commit objects, and the attribute in question
 List<Point> getLineOfBestFitPoints(List<Commit> commitObjects, bool viewingLinesAdded, bool viewingLinesDeleted, bool viewingSum){
+  if(commitObjects.isEmpty){
+    return [Point(0, 0), Point(0, 0), Point(10, 100), Point(0,0)];
+  }
+
   double meanX = 0;
   double meanY = 0;
 
@@ -55,6 +59,7 @@ List<Point> getLineOfBestFitPoints(List<Commit> commitObjects, bool viewingLines
         }
       }
   }
+
   meanX = meanX / commitObjects.length;
   meanY = meanY / commitObjects.length;
 
@@ -109,6 +114,7 @@ List<Commit> getCommitObjectsFromStringList(List<String> commits, double xRangeS
 }
 
 double roundDouble(double value, int places){
+
   num mod = pow(10.0, places);
   return ((value * mod).round().toDouble() / mod);
 }
