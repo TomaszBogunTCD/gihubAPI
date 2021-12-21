@@ -11,6 +11,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+
 @app.route("/<userName>/<repoName>/")
 @cross_origin()
 def index(userName, repoName):
@@ -19,7 +20,18 @@ def index(userName, repoName):
     si = io.StringIO()
     cw = csv.writer(si)
 
-    commits = getCommitsByRepo(repoLink)
+    try:
+        commits = getCommitsByRepo(repoLink)
+    except Exception as e:
+        if e.args[0] == 404:
+            print("repo not found")
+            return "NotFoundError"
+        elif e.args[1] == 403:
+            print("API rate limit exceeded")
+            return "LimitExceededError"
+        else:
+            print("unknown error")
+            return "UnknownError" + e.args[0]
     csvList = getCsvFromCommits(commits)
     cw.writerows(csvList)
 
@@ -27,6 +39,13 @@ def index(userName, repoName):
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+@app.errorhandler(404)
+@cross_origin()
+def page_not_found(e):
+    # your processing here
+    return "NotFoundError"
 
 
 if __name__ == "__main__":

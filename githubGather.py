@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from github import Github
 import token
@@ -5,12 +6,6 @@ import matplotlib.pyplot as plt
 from flask import Flask
 
 
-# access token should be placed in a file called "token" in the same directory
-def getTokenFromFile():
-    f = open("token", "r")
-    token = f.read()
-    f.close()
-    return token
 
 class CommitData:
     def __init__(self, linesAdded, linesDeleted, date):
@@ -22,7 +17,7 @@ class CommitData:
         self.daysSinceLastCommit = 0
 
 def getCommitsByRepo(repoLink):
-    g = Github(getTokenFromFile())
+    g = Github(os.getenv("GITHUB_API_KEY"))
     repoName = repoLink[19:]
     repo = g.get_repo(repoName)
     contributorsCommitsDict = {}

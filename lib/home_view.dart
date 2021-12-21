@@ -19,16 +19,24 @@ Future<List<String>> fetchData(String repoLink) async {
   }
   final response = await get(Uri.parse("http://127.0.0.1:5000/" + repo));
   String data = response.body;
-  List<String> lines = data.split("\n");
-  lines.removeAt(0);
-  lines.removeLast();
-  return lines;
+  if(data.contains("Error")){
+    return [data];
+  }else{
+    List<String> lines = data.split("\n");
+    lines.removeAt(0);
+    lines.removeLast();
+    return lines;
+  }
 }
 
 
 
 class _HomeViewState extends State<HomeView> {
-  bool invalid = false;
+  bool invalidInput = false;
+  bool notFoundError = false;
+  bool limitError = false;
+  bool unknownError = false;
+
   String repoLink = "";
   List<String> commits = [];
   @override
@@ -65,7 +73,7 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              invalid? "Invalid repository link!" : "",
+            invalidInput? "Invalid repository link" : (notFoundError ? "Repo not found" : (limitError ? "API limit exceeded, is the GITHUB_API_TOKEN env variable set?" : (unknownError? "Unknown error": ""))),
               style: const TextStyle(color: Colors.red),
             ),
             SizedBox(
@@ -74,15 +82,18 @@ class _HomeViewState extends State<HomeView> {
                 onChanged: (value){
                   setState(() {
                     repoLink = value;
-                    invalid = false;
+                    invalidInput = false;
+                    notFoundError = false;
+                    limitError = false;
+                    unknownError = false;
                   });
                 },
                 onEditingComplete: () {
                   setState(() {
                     if(!repoLink.contains("github.") || !repoLink.contains("/")){
-                      invalid = true;
+                      invalidInput = true;
                     }else{
-                      invalid = false;
+                      invalidInput = false;
                     }
                   });
                 },
@@ -113,14 +124,28 @@ class _HomeViewState extends State<HomeView> {
               onPressed: (){
                 setState(() {
                   if(!repoLink.contains("github.") || !repoLink.contains("/")){
-                    invalid = true;
+                    invalidInput = true;
                   }else{
-                    invalid = false;
+                    invalidInput = false;
                   }
-                  if(!invalid){
+                  if(!invalidInput){
                     fetchData(repoLink).then((value){
-                      commits = value;
-                      Navigator.pushNamed(context, "/visualisation", arguments: {"commits": commits});
+                      if(value[0] == "NotFoundError"){
+                        setState(() {
+                          notFoundError = true;
+                        });
+                      }else if(value[0] == "LimitExceededError"){
+                        setState(() {
+                          limitError = true;
+                        });
+                      }else if(value[0].contains("UnknownError")){
+                        setState(() {
+                          unknownError = true;
+                        });
+                      }else{
+                        commits = value;
+                        Navigator.pushNamed(context, "/visualisation", arguments: {"commits": commits});
+                      }
                     });
                   }
                 });
