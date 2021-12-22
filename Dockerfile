@@ -27,7 +27,7 @@ RUN flutter config --enable-web
 
 #Set GITHUB_API_TOKEN environment variable
 #replace TOKEN with own github API token
-RUN export GITHUB_API_TOKEN=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
+RUN export GITHUB_API_TOKEN=TOKEN
 
 #copies everything
 COPY . /app
