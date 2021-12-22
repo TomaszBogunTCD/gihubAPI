@@ -16,7 +16,6 @@ class CommitData:
 
 def getCommitsByRepo(repoLink):
     g = Github(os.getenv("GITHUB_API_TOKEN"))
-    print("token:" + os.getenv("GITHUB_API_TOKEN"))
     repoName = repoLink[19:]
     repo = g.get_repo(repoName)
     contributorsCommitsDict = {}

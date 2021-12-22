@@ -28,6 +28,9 @@ def index(userName, repoName):
         elif e.args[0] == 403:
             print("API rate limit exceeded")
             return "LimitExceededError"
+        elif e.args[1] == 401:
+            print("Bad API token")
+            return "TokenError"
         else:
             print(e.args)
             print("unknown error")

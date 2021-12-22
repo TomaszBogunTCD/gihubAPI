@@ -36,6 +36,7 @@ class _HomeViewState extends State<HomeView> {
   bool notFoundError = false;
   bool limitError = false;
   bool unknownError = false;
+  bool tokenError = false;
 
   String repoLink = "";
   List<String> commits = [];
@@ -73,7 +74,7 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-            invalidInput? "Invalid repository link" : (notFoundError ? "Repo not found" : (limitError ? "API limit exceeded, is the GITHUB_API_TOKEN env variable set?" : (unknownError? "Unknown error": ""))),
+            invalidInput? "Invalid repository link" : (notFoundError ? "Repo not found" : (limitError ? "API limit exceeded, is the GITHUB_API_TOKEN env variable set?" : (tokenError ? "Invalid github api token" : (unknownError? "Unknown error": "")))),
               style: const TextStyle(color: Colors.red),
             ),
             SizedBox(
@@ -85,6 +86,7 @@ class _HomeViewState extends State<HomeView> {
                     invalidInput = false;
                     notFoundError = false;
                     limitError = false;
+                    tokenError = false;
                     unknownError = false;
                   });
                 },
@@ -138,7 +140,12 @@ class _HomeViewState extends State<HomeView> {
                         setState(() {
                           limitError = true;
                         });
-                      }else if(value[0].contains("UnknownError")){
+                      }else if(value[0] == "TokenError"){
+                        setState(() {
+                          tokenError = true;
+                        });
+                      }
+                      else if(value[0].contains("UnknownError")){
                         setState(() {
                           unknownError = true;
                         });
