@@ -25,12 +25,13 @@ def index(userName, repoName):
         if e.args[0] == 404:
             print("repo not found")
             return "NotFoundError"
-        elif e.args[1] == 403:
+        elif e.args[0] == 403:
             print("API rate limit exceeded")
             return "LimitExceededError"
         else:
+            print(e.args)
             print("unknown error")
-            return "UnknownError" + e.args[0]
+            return "UnknownError"
     csvList = getCsvFromCommits(commits)
     cw.writerows(csvList)
 
