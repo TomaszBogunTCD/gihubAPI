@@ -30,7 +30,7 @@ RUN flutter config --enable-web
 ENV GITHUB_API_TOKEN=TOKEN
 
 #copies everything
-COPY ../../Desktop/githubAPI /app
+COPY . /app
 #builds web application
 RUN flutter build web
 RUN chmod +x script.sh
