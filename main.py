@@ -1,11 +1,10 @@
+# coding=utf-8
+
 import csv
 import io
-from github import Github
-import token
 from flask import Flask, make_response
 from flask_cors import CORS, cross_origin
 from githubGather import *
-import json
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -44,9 +43,8 @@ def index(userName, repoName):
 @app.errorhandler(404)
 @cross_origin()
 def page_not_found(e):
-    # your processing here
     return "NotFoundError"
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)

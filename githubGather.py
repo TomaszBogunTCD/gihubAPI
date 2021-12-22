@@ -1,10 +1,7 @@
-import os
-import numpy as np
-from github import Github
-import token
-import matplotlib.pyplot as plt
-from flask import Flask
+# coding=utf-8
 
+import os
+from github import Github
 
 
 class CommitData:
@@ -15,6 +12,7 @@ class CommitData:
         self.sum = linesDeleted + linesAdded
         self.difference = linesAdded - linesDeleted
         self.daysSinceLastCommit = 0
+
 
 def getCommitsByRepo(repoLink):
     g = Github(os.getenv("GITHUB_API_KEY"))
@@ -31,10 +29,12 @@ def getCommitsByRepo(repoLink):
             print(f"analysing commits {count}/{commitsLength} in repo {repoName}")
             login = commit.author.login
             if login in contributorsCommitsDict:
-                contributorsCommitsDict[login].append(CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date))
+                contributorsCommitsDict[login].append(
+                    CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date))
             else:
-                contributorsCommitsDict[login] = [CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date)]
-            count+=1
+                contributorsCommitsDict[login] = [
+                    CommitData(commit.stats.additions, commit.stats.deletions, commit.commit.committer.date)]
+            count += 1
         except:
             pass
 
@@ -52,6 +52,7 @@ def getCommitDataListFromDict(contributorsCommitsDict):
             allCommitsList.extend(contributorsCommitsList)
     return allCommitsList
 
+
 def getCommitsTime(commits):
     newCommits = []
     oldCommit = None
@@ -59,10 +60,11 @@ def getCommitsTime(commits):
     for commit in commits:
         if oldCommit is not None:
             dateDifferenceDays = commit.date - oldCommit.date
-            commit.daysSinceLastCommit = dateDifferenceDays.days + (dateDifferenceDays.seconds/86400)
+            commit.daysSinceLastCommit = dateDifferenceDays.days + (dateDifferenceDays.seconds / 86400)
             newCommits.append(commit)
         oldCommit = commit
     return newCommits
+
 
 def getCsvFromCommits(commits):
     data = []
@@ -71,5 +73,3 @@ def getCsvFromCommits(commits):
         data.append([commit.daysSinceLastCommit, commit.linesAdded, commit.linesDeleted])
 
     return data
-
-
