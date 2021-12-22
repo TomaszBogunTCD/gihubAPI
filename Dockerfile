@@ -27,12 +27,13 @@ RUN flutter config --enable-web
 
 #Set GITHUB_API_TOKEN environment variable
 #replace TOKEN with own github API token
-ENV GITHUB_API_TOKEN=TOKEN
+ENV GITHUB_API_TOKEN=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
 
 #copies everything
-COPY . /app
+COPY ../../Desktop/githubAPI /app
 #builds web application
 RUN flutter build web
+RUN chmod +x script.sh
 
 #runs script that starts python github api gathering server and flutter web application server
-ENTRYPOINT ["/app/script.sh"]
+CMD ["sh", "script.sh"]
